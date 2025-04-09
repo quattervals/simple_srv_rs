@@ -1,7 +1,11 @@
 use std::{
     fs,
-    io::{BufReader, prelude::*},
+    io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
     thread,
     time::Duration,
 };
@@ -9,17 +13,39 @@ use std::{
 use srv::ThreadPool;
 
 fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
+
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    listener
+        .set_nonblocking(true)
+        .expect("Failed to set TCP listener to non-blocking");
 
     let pool = ThreadPool::new(4);
 
-    // for stream in listener.incoming() {
+    println!("Server is running. Press Ctrl+C to stop...");
 
-    for stream in listener.incoming().take(2) {
-        let stream = stream.unwrap();
-
-        pool.execute(|| handle_connection(stream));
+    while running.load(Ordering::SeqCst) {
+        match listener.accept() {
+            Ok((stream, _)) => {
+                pool.execute(|| handle_connection(stream));
+            }
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(10));
+            }
+            Err(e) => {
+                eprintln!("Error accepting connection: {}", e);
+                break;
+            }
+        }
     }
+
+    println!("Shutting down gracefully...");
 }
 
 fn handle_connection(mut stream: TcpStream) {
