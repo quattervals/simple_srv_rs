@@ -48,14 +48,14 @@ async fn handle_connection(mut stream: TcpStream) -> Result<()> {
     let sleep_request = "GET /sleep HTTP/1.1";
 
     let (status_line, filename) = if request.starts_with(get) {
-        ("HTTP/1.1 200 OK", "hello.html")
+        ("HTTP/1.1 200 OK", "html/hello.html")
     } else if request.starts_with(sleep_request) {
         info!("Processing sleep request");
         sleep(Duration::from_secs(5)).await;
-        ("HTTP/1.1 200 OK", "hello.html")
+        ("HTTP/1.1 200 OK", "html/hello.html")
     } else {
         warn!("Unknown request, returning 404");
-        ("HTTP/1.1 404 NOT FOUND", "404.html")
+        ("HTTP/1.1 404 NOT FOUND", "html/404.html")
     };
 
     let contents = fs::read_to_string(filename).await.unwrap_or_else(|e| {
