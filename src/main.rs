@@ -1,4 +1,5 @@
 use anyhow::Result;
+use clap::{Arg, Command};
 use std::time::Duration;
 use tokio::{
     fs,
@@ -7,23 +8,20 @@ use tokio::{
     time::sleep,
 };
 use tracing::{error, info, warn};
-use clap::{Arg, Command};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-
-        let matches = Command::new("srv")
+    let matches = Command::new("srv")
         .arg(
             Arg::new("html-files")
                 .long("html-files")
                 .value_name("PATH")
                 .help("Path to HTML files")
-                .default_value("html")
+                .default_value("html"),
         )
         .get_matches();
 
     let html_path = matches.get_one::<String>("html-files").unwrap().clone();
-
 
     tracing_subscriber::fmt::init();
 
