@@ -12,7 +12,7 @@ use tracing::{error, info, warn};
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
-    let listener = TcpListener::bind("127.0.0.1:7878").await?;
+    let listener = TcpListener::bind("0.0.0.0:7878").await?;
     info!("Server listening");
 
     loop {
