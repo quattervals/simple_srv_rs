@@ -17,7 +17,7 @@ use std::net::{Ipv4Addr, SocketAddr};
 struct Args {
     /// Path to the file to process
     #[arg(short = 'l', long, default_value = "html")]
-    path: std::path::PathBuf,
+    html_files: std::path::PathBuf,
     /// Server Address
     #[arg(short = 'a', long, default_value = "127.0.0.1")]
     server_address: Ipv4Addr,
@@ -26,10 +26,17 @@ struct Args {
     server_port: u16,
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     let args = Args::parse();
 
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(4)
+        .enable_all()
+        .build()?;
+
+    rt.block_on(async_main(args))
+}
+async fn async_main(args: Args) -> Result<()> {
     tracing_subscriber::fmt::init();
 
     let listener = TcpListener::bind(SocketAddr::new(
@@ -43,7 +50,7 @@ async fn main() -> Result<()> {
         match listener.accept().await {
             Ok((stream, addr)) => {
                 info!("New connection from {}", addr);
-                let html_path_clone = args.path.clone();
+                let html_path_clone = args.html_files.clone();
                 tokio::spawn(async move {
                     if let Err(e) = handle_connection(stream, html_path_clone).await {
                         error!("Error handling connection from {}: {}", addr, e);
