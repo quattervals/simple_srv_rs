@@ -1,7 +1,9 @@
 [package]
 name = "webserver-rs"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
+authors = ["Oliver de Roibo"]
+description = "Simple Webserver in Rust"
 
 [dependencies]
 tokio = { version = "1.46.1", features = ["full"] }
@@ -9,4 +11,4 @@ futures = "0.3.31"
 anyhow = "1.0.98"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
-clap = "4.5.40"
+clap = { version = "4.5.40", features = ["derive"] }
