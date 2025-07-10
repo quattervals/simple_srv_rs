@@ -1,9 +1,11 @@
 [package]
 name = "webserver-rs"
-version = "0.1.5"
-edition = "2024"
+version = "0.1.6"
+edition = "2021"
 authors = ["Oliver de Roibo"]
 description = "Simple Webserver in Rust"
+repository = "https://github.com/quattervals/simple_srv_rs"
+license = "MIT"
 
 [dependencies]
 tokio = { version = "1.46.1", features = ["full"] }
